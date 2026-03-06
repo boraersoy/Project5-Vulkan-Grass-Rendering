@@ -1,14 +1,14 @@
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 
 file(GLOB IMAGES
-    ${CMAKE_CURRENT_SOURCE_DIR}/images/*.jpg
+  ${CMAKE_CURRENT_SOURCE_DIR}/images/*.jpg
     ${CMAKE_CURRENT_SOURCE_DIR}/images/*.png
     ${CMAKE_CURRENT_SOURCE_DIR}/images/*.bmp
 )
 
 foreach(IMAGE ${IMAGES})
     get_filename_component(fname ${IMAGE} NAME)
-    configure_file(${IMAGE} ${CMAKE_CURRENT_BINARY_DIR}/images/${fname} COPYONLY)
+  configure_file(${IMAGE} ${CMAKE_SOURCE_DIR}/bin/images/${fname} COPYONLY)
 endforeach()
 
 file(GLOB_RECURSE SHADER_SOURCES
@@ -37,7 +37,9 @@ foreach(SHADER_SOURCE ${SHADER_SOURCES})
         get_filename_component(fname ${SHADER_SOURCE} NAME)
         add_custom_target(${fname}.spv
             COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_DIR} && 
-            $ENV{VK_SDK_PATH}/Bin/glslangValidator.exe -V ${SHADER_SOURCE} -o ${SHADER_DIR}/${fname}.spv
+            $ENV{VK_SDK_PATH}/Bin/glslangValidator.exe -V ${SHADER_SOURCE} -o ${SHADER_DIR}/${fname}.spv &&
+            ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/bin/shaders &&
+            ${CMAKE_COMMAND} -E copy ${SHADER_DIR}/${fname}.spv ${CMAKE_SOURCE_DIR}/bin/shaders/${fname}.spv
             SOURCES ${SHADER_SOURCE}
         )
         ExternalTarget("Shaders" ${fname}.spv)

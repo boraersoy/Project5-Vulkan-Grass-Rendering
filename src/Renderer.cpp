@@ -1073,6 +1073,25 @@ void Renderer::RecordComputeCommandBuffer() {
  numWorkgroups , 
             1,   
             1);  
+            
+        // Add a memory barrier to ensure blade buffer updates are visible to the next dispatch
+   VkBufferMemoryBarrier bladeBarrier = {};
+       bladeBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    bladeBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+      bladeBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        bladeBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        bladeBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        bladeBarrier.buffer = scene->GetBlades()[i]->GetBladesBuffer();
+        bladeBarrier.offset = 0;
+  bladeBarrier.size = VK_WHOLE_SIZE;
+        
+        vkCmdPipelineBarrier(computeCommandBuffer,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+   0,
+       0, nullptr,
+      1, &bladeBarrier,
+  0, nullptr);
     }
 
     // ~ End recording ~
@@ -1208,9 +1227,20 @@ void Renderer::Frame() {
     computeSubmitInfo.commandBufferCount = 1;
     computeSubmitInfo.pCommandBuffers = &computeCommandBuffer;
 
-    if (vkQueueSubmit(device->GetQueue(QueueFlags::Compute), 1, &computeSubmitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+    // Use a fence to ensure compute finishes before graphics starts
+    VkFence computeFence;
+    VkFenceCreateInfo fenceInfo = {};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = 0;
+    vkCreateFence(logicalDevice, &fenceInfo, nullptr, &computeFence);
+
+    if (vkQueueSubmit(device->GetQueue(QueueFlags::Compute), 1, &computeSubmitInfo, computeFence) != VK_SUCCESS) {
         throw std::runtime_error("Failed to submit draw command buffer");
     }
+
+    // Wait for compute to finish
+    vkWaitForFences(logicalDevice, 1, &computeFence, VK_TRUE, UINT64_MAX);
+    vkDestroyFence(logicalDevice, computeFence, nullptr);
 
     if (!swapChain->Acquire()) {
         RecreateFrameResources();

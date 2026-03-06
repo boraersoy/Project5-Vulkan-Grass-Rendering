@@ -1061,18 +1061,18 @@ void Renderer::RecordComputeCommandBuffer() {
         // Bind Set 2: This blade group's storage buffers
         vkCmdBindDescriptorSets(computeCommandBuffer,
          VK_PIPELINE_BIND_POINT_COMPUTE,
-          computePipelineLayout,
+   computePipelineLayout,
        2,  // Set number
   1,  // Descriptor set count
-          &computeDescriptorSets[i],  // This group's descriptor set
+ &computeDescriptorSets[i],  // This group's descriptor set
        0, nullptr);
 
 
         // Dispatch the compute shader for this blade group
      vkCmdDispatch(computeCommandBuffer,
  numWorkgroups , 
-            1,   
-            1);  
+     1,   
+     1);
             
         // Add a memory barrier to ensure blade buffer updates are visible to the next dispatch
    VkBufferMemoryBarrier bladeBarrier = {};
@@ -1143,24 +1143,24 @@ void Renderer::RecordCommandBuffers() {
         std::vector<VkBufferMemoryBarrier> barriers(scene->GetBlades().size() * 2);  // Need barriers for both numBlades and culledBlades
         for (uint32_t j = 0; j < scene->GetBlades().size(); ++j) {
           // Barrier for numBlades buffer (indirect draw arguments)
-            barriers[j * 2 + 0].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-   barriers[j * 2 + 0].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-            barriers[j * 2 + 0].dstAccessMask = VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
-            barriers[j * 2 + 0].srcQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Compute);
-  barriers[j * 2 + 0].dstQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Graphics);
-         barriers[j * 2 + 0].buffer = scene->GetBlades()[j]->GetNumBladesBuffer();
-       barriers[j * 2 + 0].offset = 0;
-        barriers[j * 2 + 0].size = sizeof(BladeDrawIndirect);
-        
-// Barrier for culled blades buffer (vertex data)
-            barriers[j * 2 + 1].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-            barriers[j * 2 + 1].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-   barriers[j * 2 + 1].dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
-      barriers[j * 2 + 1].srcQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Compute);
-         barriers[j * 2 + 1].dstQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Graphics);
-    barriers[j * 2 + 1].buffer = scene->GetBlades()[j]->GetCulledBladesBuffer();
- barriers[j * 2 + 1].offset = 0;
-  barriers[j * 2 + 1].size = VK_WHOLE_SIZE;
+			barriers[j * 2 + 0].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			barriers[j * 2 + 0].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+			barriers[j * 2 + 0].dstAccessMask = VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+			barriers[j * 2 + 0].srcQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Compute);
+			barriers[j * 2 + 0].dstQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Graphics);
+			barriers[j * 2 + 0].buffer = scene->GetBlades()[j]->GetNumBladesBuffer();
+			barriers[j * 2 + 0].offset = 0;
+			barriers[j * 2 + 0].size = sizeof(BladeDrawIndirect);
+
+			// Barrier for culled blades buffer (vertex data)
+			barriers[j * 2 + 1].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			barriers[j * 2 + 1].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+			barriers[j * 2 + 1].dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+			barriers[j * 2 + 1].srcQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Compute);
+			barriers[j * 2 + 1].dstQueueFamilyIndex = device->GetQueueIndex(QueueFlags::Graphics);
+			barriers[j * 2 + 1].buffer = scene->GetBlades()[j]->GetCulledBladesBuffer();
+			barriers[j * 2 + 1].offset = 0;
+			barriers[j * 2 + 1].size = VK_WHOLE_SIZE;
         }
 
  vkCmdPipelineBarrier(commandBuffers[i], VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0, nullptr, barriers.size(), barriers.data(), 0, nullptr);
@@ -1243,7 +1243,7 @@ void Renderer::Frame() {
     vkDestroyFence(logicalDevice, computeFence, nullptr);
 
     if (!swapChain->Acquire()) {
-        RecreateFrameResources();
+     RecreateFrameResources();
         return;
     }
 

@@ -59,7 +59,7 @@ vec3 getWind(vec3 pos, float time)
 
     vec3 wind = vec3(w1 + w3, 0.0, w2);
 
-    return wind * 0.25;
+    return wind * 5.0f;
 }
 
 bool cullOrientation(vec3 frontdir, vec3 viewdir) {
@@ -116,25 +116,28 @@ void main() {
 
 
     //gravity
-    vec4 gravity = vec4(0.f, -1.0f, 0.f, -9.8f);
+    vec4 gravity = vec4(0.f, -1.0f, 0.f, 9.8f);  // Note: magnitude in w component
     vec3 ge = normalize(gravity.xyz) * gravity.w;
     vec3 front_gravity = 0.25 * length(ge) * front_dir;
     vec3 gravity_total = ge + front_gravity;
 
     //recovery
     vec3 Iv2 = v0 + height * up;
-    vec3 recovery = stiffness * (Iv2 - v2);
+    vec3 recovery = (Iv2 - v2) * stiffness;
 
     //wind 
     vec3 wind = getWind(v0, totalTime);
     float directional_alignment = 1.0 - abs(dot(normalize(wind), normalize(v2 - v0)));
     float height_ratio = dot(v2 - v0, up) / height;  
     float alignment_factor = directional_alignment * height_ratio;
-    vec3 wind_force = alignment_factor * wind;
+    vec3 wind_force = wind * alignment_factor;
 
-    //total force 
-    vec3 total_force = gravity_total + recovery + wind_force;
-    vec3 translation = total_force * deltaTime;
+    //total force - reduce recovery influence so gravity shows more
+    vec3 total_force = gravity_total + recovery  + wind_force;
+    
+    // Clamp deltaTime to prevent large jumps
+    float dt = min(deltaTime, 0.016);  // Cap at ~60 FPS to prevent instability
+    vec3 translation = total_force * dt;
     v2 += translation;
 
     // check if the v2 is on the ground
@@ -143,8 +146,12 @@ void main() {
     v1 = v0 + height * up * max(1 - (lproj / height), 0.05f * max(lproj / height, 1));
     float L = (2 * length(v2 - v0) + (BEZIER_DEG - 1) * (length(v1 - v0) + length(v2 - v1))) / (BEZIER_DEG + 1);
     float ratio = height / L;
+    
+// Correct the blade to maintain proper length
     vec3 v1corr = v0 + ratio * (v1 - v0);
     vec3 v2corr = v1 + ratio * (v2 - v1);
+    
+ // Write updated positions back to the original blades buffer so they persist across frames
     blades[index].v1.xyz = v1corr;
     blades[index].v2.xyz = v2corr;
 
@@ -169,11 +176,13 @@ void main() {
     bool cull_dist = cullDistance(up, v0, cam, 30.0, totalBlades, index);  // Reduced from 50.0 to 30.0 for more aggressive distance culling
     
   // Enable all culling tests
-    bool shouldCull = cull_orient || cull_frustum || cull_dist;
+    bool shouldCull = false;
 
   // Only write blades that are NOT culled (visible blades)
     if(!shouldCull) {
-        uint blade_index = atomicAdd(numBlades.vertexCount, 1);
-        culled_blades[blade_index] = blades[index];
-  }
+   uint blade_index = atomicAdd(numBlades.vertexCount, 1);
+   // Write the UPDATED blade data to culled buffer for rendering
+    culled_blades[blade_index] = blades[index];
+    }
+   
 }

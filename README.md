@@ -33,8 +33,15 @@ on its horizontal axis.
 
 | No Cull | Frustum Culling | Distance Culling | Orientation Culling|
 | ----- | ----- | ----- | ----- |
-| ![](images/nocull.gif)|![](images/frustrumculling.gif)|![](images/distanceculling.gif)|![](images/orientationculling.gif)|
+| ![](img/nocull.gif)|![](img/frustrumculling.gif)|![](img/distanceculling.gif)|![](img/orientationculling.gif)|
 
 ### Performance Analysis
 
+Here is the frame per second of the application with the number of log2(n) grass instances
+
+![](img/ngrassvsfps.png)
+
+Here is the effect of different culling techniques on FPS with 2^15 grass instances
+
+![](img/cullingmethods.png)
 

@@ -172,11 +172,11 @@ void main() {
     
   // Test culling conditions (true means the blade should be culled)
     bool cull_orient = cullOrientation(front_dir, view_dir);
-    bool cull_frustum = cullViewFrustrum(v0, v1corr, v2corr);
+    bool cull_frustrum = cullViewFrustrum(v0, v1corr, v2corr);
     bool cull_dist = cullDistance(up, v0, cam, 30.0, totalBlades, index);  // Reduced from 50.0 to 30.0 for more aggressive distance culling
     
   // Enable all culling tests
-    bool shouldCull = false;
+    bool shouldCull = cull_orient || cull_dist || cull_frustrum;
 
   // Only write blades that are NOT culled (visible blades)
     if(!shouldCull) {

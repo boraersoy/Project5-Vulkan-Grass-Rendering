@@ -27,6 +27,11 @@ private:
     std::vector<Blades*> blades;
 
 high_resolution_clock::time_point startTime = high_resolution_clock::now();
+    
+    // FPS tracking
+    int frameCount = 0;
+    high_resolution_clock::time_point lastFPSTime = high_resolution_clock::now();
+    float currentFPS = 0.0f;
 
 public:
     Scene() = delete;
@@ -42,4 +47,5 @@ public:
     VkBuffer GetTimeBuffer() const;
 
     void UpdateTime();
+    float GetFPS() const;
 };

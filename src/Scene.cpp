@@ -32,6 +32,19 @@ void Scene::UpdateTime() {
     time.totalTime += time.deltaTime;
 
     memcpy(mappedData, &time, sizeof(Time));
+
+    // Update FPS counter
+    frameCount++;
+    duration<float> fpsDuration = duration_cast<duration<float>>(currentTime - lastFPSTime);
+    if (fpsDuration.count() >= 1.0f) {  // Update FPS every second
+   currentFPS = frameCount / fpsDuration.count();
+     frameCount = 0;
+        lastFPSTime = currentTime;
+    }
+}
+
+float Scene::GetFPS() const {
+    return currentFPS;
 }
 
 VkBuffer Scene::GetTimeBuffer() const {

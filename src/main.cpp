@@ -145,8 +145,16 @@ int main() {
 
     while (!ShouldQuit()) {
         glfwPollEvents();
-        scene->UpdateTime();
+    scene->UpdateTime();
         renderer->Frame();
+        
+        // Update window title with FPS
+        static int frameCounter = 0;
+        if (++frameCounter % 10 == 0) {  // Update title every 10 frames to avoid flickering
+ char title[256];
+     snprintf(title, sizeof(title), "Vulkan Grass Rendering - FPS: %.1f", scene->GetFPS());
+      glfwSetWindowTitle(GetGLFWWindow(), title);
+        }
     }
 
     vkDeviceWaitIdle(device->GetVkDevice());

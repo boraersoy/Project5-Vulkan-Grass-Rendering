@@ -20,9 +20,13 @@ and animated to create a realistic waving effect.
 The grass blades are animated using a simple physics simulation that takes into account various forces such as 
 wind forces, gravity and wind. The simulation is performed in a compute shader, allowing for real-time updates of the grass animation.
 
-| No Force | Gravity | Gravity and Recovery | Gravity, Recovery and Wind |
-| ----- | ----- | ----- | ----- |
-|![](images/noforce.png)|![](images/gravity.png)|![](images/gravityandrecovery.png)| ![](images/grassanimation.png)
+| No Force | Gravity |
+| ----- | ----- |
+|![](img/noforce.png)|![](img/gravity.png)|
+
+ | Gravity and Recovery | Gravity, Recovery and Wind |
+ | ----- | ----- |
+ |![](img/gravityandrecovery.png)| ![](img/grassanimation.gif)|
 
 ### Culling 
 The application implements frustrum culling, distance culling and orientation culling.
@@ -31,17 +35,21 @@ The application implements frustrum culling, distance culling and orientation cu
 - Orientation Culling: Culls grass blades that are oriented away from the camera position because grass has no width
 on its horizontal axis.
 
-| No Cull | Frustum Culling | Distance Culling | Orientation Culling|
-| ----- | ----- | ----- | ----- |
-| ![](img/nocull.gif)|![](img/frustrumculling.gif)|![](img/distanceculling.gif)|![](img/orientationculling.gif)|
+| No Cull | Frustum Culling |
+| ----- | ----- |
+| ![](img/nocull.gif)|![](img/frustrumculling.gif)|
+
+ | Distance Culling | Orientation Culling|
+ | ----- | ----- |
+ | ![](img/distanceculling.gif)|![](img/orientationculling.gif)|
 
 ### Performance Analysis
 
-Here is the frame per second of the application with the number of log2(n) grass instances
+FPS of the application with the number of log2(n) grass instances. No culling is used.
 
 ![](img/ngrassvsfps.png)
 
-Here is the effect of different culling techniques on FPS with 2^15 grass instances
+Effect of different culling techniques on FPS with 2^15 grass instances. FPS is highly dependent of the cameras position. Initial camera position is used.
 
 ![](img/cullingmethods.png)
 
